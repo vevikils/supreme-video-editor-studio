@@ -13,11 +13,15 @@ import customtkinter as ctk
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+# Extended transitions list for cinematic variety
 TRANSITIONS = [
-    "fade", "dissolve", "wipeleft", "wiperight", "wipeup", "wipedown",
+    "fade", "dissolve", "fadeblack", "fadewhite", "distance",
+    "wipeleft", "wiperight", "wipeup", "wipedown", "wipetl", "wipetr", "wipebl", "wipebr",
     "slideleft", "slideright", "slideup", "slidedown",
-    "smoothleft", "smoothright", "circlecrop", "rectcrop",
-    "distance", "fadeblack", "fadewhite", "radial", "zoomin"
+    "smoothleft", "smoothright", "smoothup", "smoothdown",
+    "circlecrop", "rectcrop", "circleopen", "circleclose",
+    "radial", "zoomin", "hlslice", "hrslice", "vu_slice", "vd_slice",
+    "squeezeh", "squeezev", "horzopen", "horzclose", "vertopen", "vertclose"
 ]
 
 VARIATION_MODES = [
@@ -30,7 +34,6 @@ VARIATION_MODES = [
 PLATFORM_PRESETS = {
     "YouTube Visualizer (1080p 16:9 - Duración Completa Canción)": {
         "res": "1920x1080",
-        "fps": "30 fps",
         "aspect": "16:9",
         "duration_mode": "full_audio",
         "custom_dur": 0.0,
@@ -40,7 +43,6 @@ PLATFORM_PRESETS = {
     },
     "Spotify Canvas (9:16 Vertical - Loop Corto 7.5s - Sin Audio)": {
         "res": "1080x1920",
-        "fps": "30 fps",
         "aspect": "9:16",
         "duration_mode": "fixed_short",
         "custom_dur": 7.5,
@@ -51,7 +53,6 @@ PLATFORM_PRESETS = {
     },
     "TikTok & Instagram Reels (9:16 Vertical - 30 Segundos Punchy)": {
         "res": "1080x1920",
-        "fps": "30 fps",
         "aspect": "9:16",
         "duration_mode": "fixed_short",
         "custom_dur": 30.0,
@@ -61,7 +62,6 @@ PLATFORM_PRESETS = {
     },
     "TikTok & Instagram Reels (9:16 Vertical - Duración Completa)": {
         "res": "1080x1920",
-        "fps": "30 fps",
         "aspect": "9:16",
         "duration_mode": "full_audio",
         "custom_dur": 0.0,
@@ -71,7 +71,6 @@ PLATFORM_PRESETS = {
     },
     "YouTube 4K Ultra HD (3840x2160 - Máxima Calidad)": {
         "res": "3840x2160",
-        "fps": "30 fps",
         "aspect": "16:9",
         "duration_mode": "full_audio",
         "custom_dur": 0.0,
@@ -81,7 +80,6 @@ PLATFORM_PRESETS = {
     },
     "Cuadrado Instagram Feed (1:1 - 1080x1080 - 60s)": {
         "res": "1080x1080",
-        "fps": "30 fps",
         "aspect": "1:1",
         "duration_mode": "fixed_short",
         "custom_dur": 60.0,
@@ -98,6 +96,13 @@ GENRE_STYLES = [
     "Hip Hop / Boombap / Lo-Fi",
     "Pop / Rock / Indie",
     "Personalizado / Libre"
+]
+
+TEXT_POSITIONS = [
+    "Centro (Estilo Portada Cinematográfica)",
+    "Inferior Centrado (Subtítulo / Tercio Inferior)",
+    "Superior Centrado (Top Banner)",
+    "Esquina Inferior Izquierda (Minimalista)"
 ]
 
 def probe_file(file_path):
@@ -131,13 +136,27 @@ def probe_file(file_path):
     except Exception:
         return None
 
+def get_system_font_path():
+    """Busca una fuente de alta legibilidad instalada en Windows"""
+    candidates = [
+        r"C:\Windows\Fonts\arialbd.ttf",
+        r"C:\Windows\Fonts\arial.ttf",
+        r"C:\Windows\Fonts\seguiemj.ttf",
+        r"C:\Windows\Fonts\segoeui.ttf",
+        r"C:\Windows\Fonts\tahoma.ttf"
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c.replace("\\", "/")
+    return "C:/Windows/Fonts/arial.ttf"
+
 class SupremeVideoEditor(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Supreme Video Editor Studio v2.0 - Multi-Platform & SEO Metadata Engine")
-        self.geometry("1060x860")
-        self.minsize(920, 720)
+        self.title("Supreme Video Editor Studio v2.5 - Professional Visualizer & Metadata Suite")
+        self.geometry("1100x890")
+        self.minsize(940, 740)
 
         # State Variables
         self.video_path = tk.StringVar(value="")
@@ -179,7 +198,7 @@ class SupremeVideoEditor(ctk.CTk):
 
         title_badge = ctk.CTkLabel(
             header,
-            text="★ SUPREME 2.0",
+            text="★ SUPREME 2.5",
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
             fg_color="#e11d48",
             corner_radius=6,
@@ -198,7 +217,7 @@ class SupremeVideoEditor(ctk.CTk):
 
         sub_label = ctk.CTkLabel(
             header,
-            text="YouTube • Spotify Canvas • TikTok / Reels • SEO AI Tags",
+            text="Universal Compatibility (YUV420p) • Typography Overlays • Multi-Platform",
             font=ctk.CTkFont(family="Segoe UI", size=12),
             text_color="#94a3b8"
         )
@@ -225,7 +244,7 @@ class SupremeVideoEditor(ctk.CTk):
 
         self.lbl_status = ctk.CTkLabel(
             p_frame,
-            text="Listo para renderizar y exportar",
+            text="Listo para renderizar y exportar con máxima compatibilidad universal",
             font=ctk.CTkFont(size=12),
             text_color="#94a3b8"
         )
@@ -351,7 +370,7 @@ class SupremeVideoEditor(ctk.CTk):
 
         ctk.CTkLabel(
             loop_card,
-            text="✨ CONFIGURACIÓN DE LOOP Y ESTILO",
+            text="✨ CONFIGURACIÓN DE LOOP Y EFECTOS",
             font=ctk.CTkFont(size=13, weight="bold"),
             text_color="#c084fc"
         ).grid(row=0, column=0, columnspan=2, sticky="w", padx=16, pady=(12, 8))
@@ -365,7 +384,7 @@ class SupremeVideoEditor(ctk.CTk):
         self.combo_mode.set(VARIATION_MODES[0])
         self.combo_mode.grid(row=1, column=0, sticky="ew", pady=(0, 10))
 
-        ctk.CTkLabel(f_left, text="Transición Entre Loops:", font=ctk.CTkFont(size=12, weight="bold")).grid(row=2, column=0, sticky="w", pady=(0, 3))
+        ctk.CTkLabel(f_left, text="Transición Entre Loops (36+ Efectos):", font=ctk.CTkFont(size=12, weight="bold")).grid(row=2, column=0, sticky="w", pady=(0, 3))
         self.combo_trans = ctk.CTkComboBox(f_left, values=["Aleatorias Dinámicas"] + TRANSITIONS, height=32, state="readonly")
         self.combo_trans.set("Aleatorias Dinámicas")
         self.combo_trans.grid(row=3, column=0, sticky="ew", pady=(0, 6))
@@ -390,7 +409,50 @@ class SupremeVideoEditor(ctk.CTk):
         self.slider_fade_out.set(2.0)
         self.slider_fade_out.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(0, 6))
 
-        # CARD 4: Live Summary
+        # CARD 4: Tipografía y Texto Personalizado en Vídeo
+        text_card = ctk.CTkFrame(scroll, corner_radius=12, fg_color=("#212435", "#181a27"))
+        text_card.grid(row=3, column=0, sticky="ew", pady=(0, 12), padx=5)
+        text_card.grid_columnconfigure((1, 3), weight=1)
+
+        ctk.CTkLabel(
+            text_card,
+            text="✍️ TEXTO Y TÍTULOS SOBRE EL VÍDEO (PLANTILLA)",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            text_color="#34d399"
+        ).grid(row=0, column=0, columnspan=4, sticky="w", padx=16, pady=(12, 8))
+
+        self.chk_enable_overlay = ctk.CTkCheckBox(
+            text_card,
+            text="Incrustar Título y Artista en el vídeo",
+            font=ctk.CTkFont(weight="bold"),
+            onvalue=True,
+            offvalue=False
+        )
+        self.chk_enable_overlay.select()
+        self.chk_enable_overlay.grid(row=1, column=0, columnspan=2, sticky="w", padx=16, pady=(0, 10))
+
+        # Text input fields
+        ctk.CTkLabel(text_card, text="Título en Pantalla:").grid(row=2, column=0, sticky="w", padx=(16, 8), pady=3)
+        self.entry_overlay_title = ctk.CTkEntry(text_card, textvariable=self.track_title, placeholder_text="Ej: UNA DIABLA")
+        self.entry_overlay_title.grid(row=2, column=1, sticky="ew", padx=(0, 16), pady=3)
+
+        ctk.CTkLabel(text_card, text="Artista / Subtítulo:").grid(row=2, column=2, sticky="w", padx=(16, 8), pady=3)
+        self.entry_overlay_artist = ctk.CTkEntry(text_card, textvariable=self.artist_name, placeholder_text="Ej: KDR ft. VEVI")
+        self.entry_overlay_artist.grid(row=2, column=3, sticky="ew", padx=(0, 16), pady=3)
+
+        ctk.CTkLabel(text_card, text="Posición del Texto:").grid(row=3, column=0, sticky="w", padx=(16, 8), pady=6)
+        self.combo_text_pos = ctk.CTkComboBox(text_card, values=TEXT_POSITIONS, state="readonly", height=30)
+        self.combo_text_pos.set(TEXT_POSITIONS[0])
+        self.combo_text_pos.grid(row=3, column=1, sticky="ew", padx=(0, 16), pady=6)
+
+        ctk.CTkLabel(text_card, text="Duración Aparición:").grid(row=3, column=2, sticky="w", padx=(16, 8), pady=6)
+        self.combo_text_timing = ctk.CTkComboBox(text_card, values=["Durante Todo el Vídeo", "Primeros 15 segundos", "Primeros 8 segundos"], state="readonly", height=30)
+        self.combo_text_timing.set("Durante Todo el Vídeo")
+        self.combo_text_timing.grid(row=3, column=3, sticky="ew", padx=(0, 16), pady=6)
+
+        ctk.CTkLabel(text_card, text="", height=4).grid(row=4, column=0)
+
+        # CARD 5: Live Summary
         self.summary_box = ctk.CTkLabel(
             scroll,
             text="Esperando archivos de vídeo y audio para calcular sincronización...",
@@ -401,7 +463,7 @@ class SupremeVideoEditor(ctk.CTk):
             justify="left",
             anchor="w"
         )
-        self.summary_box.grid(row=3, column=0, sticky="ew", pady=(0, 10), padx=5)
+        self.summary_box.grid(row=4, column=0, sticky="ew", pady=(0, 10), padx=5)
 
     def _build_seo_tab(self):
         container = self.tab_seo
@@ -574,7 +636,7 @@ class SupremeVideoEditor(ctk.CTk):
         info = probe_file(path)
         if info and info["duration"] > 0:
             self.video_dur = info["duration"]
-            self.lbl_video_info.configure(text=f"Duración: {self.video_dur:.2f}s ({self.format_time(self.video_dur)}) | Con vídeo detectado", text_color="#4ade80")
+            self.lbl_video_info.configure(text=f"Duración: {self.video_dur:.2f}s ({self.format_time(self.video_dur)}) | Vídeo OK", text_color="#4ade80")
         else:
             self.video_dur = 0.0
             self.lbl_video_info.configure(text="No se pudo determinar duración (Revisa que FFmpeg esté disponible)", text_color="#f87171")
@@ -599,9 +661,7 @@ class SupremeVideoEditor(ctk.CTk):
             self.audio_dur = 0.0
             self.lbl_audio_info.configure(text="No se pudo determinar duración", text_color="#f87171")
         
-        # Auto-detect track title from audio file name
         base_name = os.path.splitext(os.path.basename(path))[0]
-        # Clean track name if it has format like 'kdr ft vevi drill - 1 - UNA DIABLA'
         if "-" in base_name:
             parts = base_name.split("-")
             self.track_title.set(parts[-1].strip())
@@ -618,7 +678,7 @@ class SupremeVideoEditor(ctk.CTk):
         file = filedialog.asksaveasfilename(
             title="Guardar Vídeo Final Como",
             defaultextension=".mp4",
-            filetypes=[("Vídeo MP4", "*.mp4")]
+            filetypes=[("Vídeo MP4 Universal", "*.mp4")]
         )
         if file:
             self.output_path.set(file)
@@ -662,13 +722,13 @@ class SupremeVideoEditor(ctk.CTk):
         if needed_loops < 2:
             needed_loops = 2
 
-        audio_note = "Sin audio (Loop visual silencioso para Spotify)" if preset.get("no_audio") else f"Sincronizado con pista de audio ({target_dur:.2f}s)"
+        audio_note = "Sin audio (Loop visual para Spotify Canvas)" if preset.get("no_audio") else f"Sincronizado con pista de audio ({target_dur:.2f}s)"
 
         summary_text = (
-            f"📊 ESTIMACIÓN DE MONTAJE ({preset['res']} • {preset['aspect']}):\n"
-            f"• Duración final objetivo: {target_dur:.2f}s | Vídeo fuente: {self.video_dur:.2f}s\n"
-            f"• Se generarán {needed_loops} bucles continuos con transiciones cruzadas de {trans_dur:.1f}s\n"
-            f"• Configuración de Audio: {audio_note} | Fade Out: {self.slider_fade_out.get():.1f}s"
+            f"📊 ESTIMACIÓN ({preset['res']} • {preset['aspect']}):\n"
+            f"• Duración final: {target_dur:.2f}s | Vídeo fuente: {self.video_dur:.2f}s\n"
+            f"• {needed_loops} bucles continuos con transiciones cruzadas xfade ({trans_dur:.1f}s)\n"
+            f"• Audio: {audio_note} | Perfil YUV420p (Máxima compatibilidad con reproductores)"
         )
         self.summary_box.configure(text=summary_text)
 
@@ -680,12 +740,10 @@ class SupremeVideoEditor(ctk.CTk):
         ig = self.instagram_user.get().strip() or "@vevikils"
         mail = self.contact_email.get().strip() or "contacto@vevi.com"
 
-        # 1. Suggested YouTube Title
         youtube_title = f"{title.upper()} - {artist} (Visualizer Oficial) [Prod. by {producer}]"
         self.txt_suggested_title.delete(0, "end")
         self.txt_suggested_title.insert(0, youtube_title)
 
-        # 2. Suggested Description
         clean_title_tag = "".join(c for c in title if c.isalnum())
         artist_clean = "".join(c for c in artist.split()[0] if c.isalnum())
 
@@ -708,7 +766,6 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         self.txt_desc.delete("1.0", "end")
         self.txt_desc.insert("1.0", desc_content)
 
-        # 3. Tags
         genre_tags = []
         if "Drill" in genre:
             genre_tags = ["drill espanol", "spanish drill", "drill beat", "drill 2026", "drill espana", "drill argentino"]
@@ -733,7 +790,6 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         self.txt_tags.delete("1.0", "end")
         self.txt_tags.insert("1.0", tags_string)
 
-        # Hashtags
         hashtags = f"#{clean_title_tag} #{artist_clean} #Visualizer #MusicVideo #UrbanMusic #{genre.split('/')[0].replace(' ', '')}"
         self.txt_hashtags.delete(0, "end")
         self.txt_hashtags.insert(0, hashtags)
@@ -768,7 +824,7 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         self.btn_render.configure(state="disabled", text="⏳ RENDERIZANDO...")
         self.btn_cancel.configure(state="normal")
         self.progress_bar.set(0)
-        self.lbl_status.configure(text="Iniciando motor FFmpeg multi-plataforma...", text_color="#38bdf8")
+        self.lbl_status.configure(text="Iniciando render con codificación universal...", text_color="#38bdf8")
 
         thread = threading.Thread(target=self._render_worker, daemon=True)
         thread.start()
@@ -802,19 +858,17 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         w_str, h_str = preset["res"].split("x")
         width, height = int(w_str), int(h_str)
 
-        # Target duration
         if preset["duration_mode"] == "fixed_short":
             target_dur = preset["custom_dur"]
         else:
             target_dur = a_dur if a_dur > 0 else 60.0
 
-        # Calculate number of clips needed
         effective_clip_dur = max(0.5, v_dur - trans_dur)
         needed_loops = math.ceil((target_dur - trans_dur) / effective_clip_dur) + 1
         if needed_loops < 2:
             needed_loops = 2
 
-        # Scale and crop to fit selected aspect ratio perfectly
+        # Base scaling and cropping to exact target resolution
         base_scale = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},fps=30"
 
         clip_labels = []
@@ -899,12 +953,69 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
             current_input = out_lbl
             cur_offset += (v_dur - trans_dur)
 
-        # Video fade out if configured
+        # Video fade out
         if fade_out > 0.1:
             fade_start = max(0.0, target_dur - fade_out)
-            filter_lines.append(f"[{current_input}]fade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[vout];")
+            filter_lines.append(f"[{current_input}]fade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[v_faded];")
+            last_v = "v_faded"
         else:
-            filter_lines.append(f"[{current_input}]null[vout];")
+            last_v = current_input
+
+        # Text Overlay Processing
+        enable_text = self.chk_enable_overlay.get()
+        title_text = self.entry_overlay_title.get().strip()
+        artist_text = self.entry_overlay_artist.get().strip()
+
+        if enable_text and (title_text or artist_text):
+            font_path = get_system_font_path()
+            # Escaping for drawtext
+            safe_title = title_text.replace(":", "\\:").replace("'", "\\'").upper()
+            safe_artist = artist_text.replace(":", "\\:").replace("'", "\\'")
+
+            # Scaling font size according to resolution
+            title_fsize = max(28, int(width / 32))
+            artist_fsize = max(18, int(width / 48))
+
+            pos_choice = self.combo_text_pos.get()
+            if "Inferior Centrado" in pos_choice:
+                y_title = "h-th-130"
+                y_artist = "h-th-80"
+                x_title = "(w-text_w)/2"
+                x_artist = "(w-text_w)/2"
+            elif "Superior Centrado" in pos_choice:
+                y_title = "80"
+                y_artist = "140"
+                x_title = "(w-text_w)/2"
+                x_artist = "(w-text_w)/2"
+            elif "Esquina Inferior Izquierda" in pos_choice:
+                x_title = "70"
+                x_artist = "70"
+                y_title = "h-th-130"
+                y_artist = "h-th-80"
+            else: # Centro (Estilo Portada Cinematográfica)
+                y_title = "(h-text_h)/2-35"
+                y_artist = "(h-text_h)/2+35"
+                x_title = "(w-text_w)/2"
+                x_artist = "(w-text_w)/2"
+
+            # Timing condition
+            timing_choice = self.combo_text_timing.get()
+            timing_filter = ""
+            if "15 segundos" in timing_choice:
+                timing_filter = ":enable='between(t,0,15)'"
+            elif "8 segundos" in timing_choice:
+                timing_filter = ":enable='between(t,0,8)'"
+
+            # Draw title
+            filter_lines.append(
+                f"[{last_v}]drawtext=fontfile='{font_path}':text='{safe_title}':fontsize={title_fsize}:fontcolor=white:x={x_title}:y={y_title}:shadowcolor=black@0.8:shadowx=3:shadowy=3{timing_filter}[v_txt1];"
+            )
+            # Draw artist
+            filter_lines.append(
+                f"[v_txt1]drawtext=fontfile='{font_path}':text='{safe_artist}':fontsize={artist_fsize}:fontcolor=white@0.85:x={x_artist}:y={y_artist}:shadowcolor=black@0.8:shadowx=2:shadowy=2{timing_filter}[vout];"
+            )
+        else:
+            filter_lines.append(f"[{last_v}]null[vout];")
 
         # Audio handling
         if not is_no_audio and os.path.exists(a_in):
@@ -937,10 +1048,12 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
                 "-ar", "48000"
             ])
         else:
-            cmd.append("-an")  # No audio stream (Spotify Canvas requirement)
+            cmd.append("-an")
 
+        # CRITICAL FIX: Explicit -pix_fmt yuv420p for 100% universal player compatibility (Windows Media Player, QuickTime, iOS, Android, Browsers)
         cmd.extend([
             "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
             "-preset", "medium",
             "-crf", "18",
             "-t", f"{target_dur:.3f}",
@@ -949,7 +1062,7 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         ])
 
         self.lbl_status.configure(
-            text=f"Exportando {preset['aspect']} ({target_dur:.1f}s) para {preset['suffix']}...",
+            text=f"Exportando {preset['aspect']} ({target_dur:.1f}s) con YUV420p universal...",
             text_color="#f59e0b"
         )
 
@@ -1002,13 +1115,13 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
     def _on_render_success(self, out_file):
         self.is_exporting = False
         self.progress_bar.set(1.0)
-        self.lbl_status.configure(text="¡Vídeo renderizado con éxito! 🎉", text_color="#4ade80")
+        self.lbl_status.configure(text="¡Vídeo exportado con éxito en formato universal! 🎉", text_color="#4ade80")
         self.btn_render.configure(state="normal", text="⚡ EXPORTAR VÍDEO CON FORMATO SELECCIONADO")
         self.btn_cancel.configure(state="disabled")
 
         res = messagebox.askyesno(
             "¡Exportación Finalizada!",
-            f"El vídeo ha sido creado correctamente en:\n\n{out_file}\n\n¿Deseas abrir la carpeta de destino ahora?"
+            f"El vídeo ha sido creado correctamente en formato universal compatible (YUV420p):\n\n{out_file}\n\n¿Deseas abrir la carpeta de destino ahora?"
         )
         if res:
             try:
