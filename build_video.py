@@ -67,6 +67,7 @@ cmd = [
     "-map", "[vout]",
     "-map", "[aout]",
     "-c:v", "libx264",
+    "-pix_fmt", "yuv420p",
     "-preset", "medium",
     "-crf", "18",
     "-c:a", "aac",
