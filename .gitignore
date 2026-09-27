@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+
+# Build & Dist artifacts
+build/
+dist/
+*.exe
+
+# Large media files (keep code light & fast)
+*.mp4
+*.wav
+*.mp3
+*.mkv
+*.mov
+
+# OS specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
