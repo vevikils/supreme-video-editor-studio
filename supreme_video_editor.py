@@ -154,7 +154,7 @@ class SupremeVideoEditor(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Supreme Video Editor Studio v2.5 - Professional Visualizer & Metadata Suite")
+        self.title("Supreme Video Editor Studio v3.0 - Professional Visualizer & Metadata Suite")
         self.geometry("1100x890")
         self.minsize(940, 740)
 
@@ -173,6 +173,11 @@ class SupremeVideoEditor(ctk.CTk):
         self.audio_dur = 0.0
         self.is_exporting = False
         self.process = None
+
+        # User Customizable Parameters (Duration, Zoom & Song Start Time)
+        self.custom_duration_var = tk.StringVar(value="30.0")
+        self.audio_start_var = tk.StringVar(value="00:00")
+        self.zoom_var = tk.StringVar(value="100")
 
         self._build_ui()
         self._check_default_files()
@@ -198,7 +203,7 @@ class SupremeVideoEditor(ctk.CTk):
 
         title_badge = ctk.CTkLabel(
             header,
-            text="★ SUPREME 2.5",
+            text="★ SUPREME 2.7",
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
             fg_color="#e11d48",
             corner_radius=6,
@@ -325,14 +330,14 @@ class SupremeVideoEditor(ctk.CTk):
         )
         self.lbl_preset_desc.grid(row=1, column=0, sticky="w")
 
-        # CARD 2: Archivos Multimedia
+        # CARD 2: Archivos Multimedia & Control de Tiempo
         files_card = ctk.CTkFrame(scroll, corner_radius=12, fg_color=("#212435", "#181a27"))
         files_card.grid(row=1, column=0, sticky="ew", pady=(0, 12), padx=5)
         files_card.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
             files_card,
-            text="📂 ARCHIVOS MULTIMEDIA",
+            text="📂 ARCHIVOS MULTIMEDIA & SINCRONIZACIÓN",
             font=ctk.CTkFont(size=13, weight="bold"),
             text_color="#38bdf8"
         ).grid(row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(12, 6))
@@ -355,15 +360,57 @@ class SupremeVideoEditor(ctk.CTk):
         self.lbl_audio_info = ctk.CTkLabel(files_card, text="Duración: No cargado", text_color="#94a3b8", font=ctk.CTkFont(size=11))
         self.lbl_audio_info.grid(row=4, column=1, sticky="w", padx=2, pady=(0, 6))
 
+        # Prominent Audio Timing & Clip Duration Panel inside CARD 2
+        timing_panel = ctk.CTkFrame(files_card, fg_color=("#181926", "#11121d"), corner_radius=8)
+        timing_panel.grid(row=5, column=0, columnspan=3, sticky="ew", padx=16, pady=(4, 10))
+        timing_panel.grid_columnconfigure((1, 3), weight=1)
+
+        # 1. Custom Duration Control
+        ctk.CTkLabel(
+            timing_panel,
+            text="⏱️ Duración del Vídeo (s):",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#fbbf24"
+        ).grid(row=0, column=0, sticky="w", padx=(14, 8), pady=10)
+        self.entry_custom_dur = ctk.CTkEntry(
+            timing_panel,
+            textvariable=self.custom_duration_var,
+            width=80,
+            height=30,
+            font=ctk.CTkFont(size=12, weight="bold"),
+            justify="center"
+        )
+        self.entry_custom_dur.grid(row=0, column=1, sticky="w", padx=(0, 16), pady=10)
+        self.entry_custom_dur.bind("<KeyRelease>", lambda e: self.update_summary())
+
+        # 2. Audio Start Time Control (SUPER VISIBLE)
+        ctk.CTkLabel(
+            timing_panel,
+            text="🎵 Iniciar Audio en Segundo / Minuto:",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#4ade80"
+        ).grid(row=0, column=2, sticky="w", padx=(10, 8), pady=10)
+        self.entry_audio_start = ctk.CTkEntry(
+            timing_panel,
+            textvariable=self.audio_start_var,
+            width=90,
+            height=30,
+            font=ctk.CTkFont(size=12, weight="bold"),
+            placeholder_text="00:00 o seg",
+            justify="center"
+        )
+        self.entry_audio_start.grid(row=0, column=3, sticky="w", padx=(0, 14), pady=10)
+        self.entry_audio_start.bind("<KeyRelease>", lambda e: self.update_summary())
+
         # Output Row
-        ctk.CTkLabel(files_card, text="Guardar en:", font=ctk.CTkFont(weight="bold")).grid(row=5, column=0, sticky="w", padx=16, pady=4)
+        ctk.CTkLabel(files_card, text="Guardar en:", font=ctk.CTkFont(weight="bold")).grid(row=6, column=0, sticky="w", padx=16, pady=4)
         self.entry_output = ctk.CTkEntry(files_card, textvariable=self.output_path, placeholder_text="Destino del archivo de vídeo...")
-        self.entry_output.grid(row=5, column=1, sticky="ew", padx=(0, 10), pady=4)
-        ctk.CTkButton(files_card, text="Destino", width=90, command=self.browse_output).grid(row=5, column=2, padx=(0, 16), pady=4)
+        self.entry_output.grid(row=6, column=1, sticky="ew", padx=(0, 10), pady=4)
+        ctk.CTkButton(files_card, text="Destino", width=90, command=self.browse_output).grid(row=6, column=2, padx=(0, 16), pady=4)
 
-        ctk.CTkLabel(files_card, text="", height=2).grid(row=6, column=0)
+        ctk.CTkLabel(files_card, text="", height=2).grid(row=7, column=0)
 
-        # CARD 3: Transiciones & Efectos
+        # CARD 3: Transiciones, Zoom & Efectos
         loop_card = ctk.CTkFrame(scroll, corner_radius=12, fg_color=("#212435", "#181a27"))
         loop_card.grid(row=2, column=0, sticky="ew", pady=(0, 12), padx=5)
         loop_card.grid_columnconfigure((0, 1), weight=1)
@@ -408,6 +455,21 @@ class SupremeVideoEditor(ctk.CTk):
         self.slider_fade_out = ctk.CTkSlider(f_right, from_=0.0, to=4.0, number_of_steps=40, command=self._on_fade_out_change)
         self.slider_fade_out.set(2.0)
         self.slider_fade_out.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(0, 6))
+
+        # Bottom row in loop_card: Zoom del Vídeo
+        f_custom = ctk.CTkFrame(loop_card, fg_color=("#181926", "#11121d"), corner_radius=8)
+        f_custom.grid(row=2, column=0, columnspan=2, sticky="ew", padx=16, pady=(0, 14))
+        f_custom.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(f_custom, text="🔍 Zoom Vídeo (Encuadre / Escala):", font=ctk.CTkFont(size=12, weight="bold"), text_color="#38bdf8").grid(row=0, column=0, sticky="w", padx=(14, 8), pady=8)
+        z_frame = ctk.CTkFrame(f_custom, fg_color="transparent")
+        z_frame.grid(row=0, column=1, sticky="ew", padx=(0, 14), pady=8)
+        z_frame.grid_columnconfigure(0, weight=1)
+        self.slider_zoom = ctk.CTkSlider(z_frame, from_=50, to=250, number_of_steps=40, command=self._on_zoom_change)
+        self.slider_zoom.set(100)
+        self.slider_zoom.grid(row=0, column=0, sticky="ew")
+        self.lbl_zoom = ctk.CTkLabel(z_frame, text="100%", width=50, font=ctk.CTkFont(size=12, weight="bold"), text_color="#38bdf8")
+        self.lbl_zoom.grid(row=0, column=1, padx=(8, 0))
 
         # CARD 4: Tipografía y Texto Personalizado en Vídeo
         text_card = ctk.CTkFrame(scroll, corner_radius=12, fg_color=("#212435", "#181a27"))
@@ -605,6 +667,26 @@ class SupremeVideoEditor(ctk.CTk):
         self.txt_hashtags = ctk.CTkEntry(tags_card, font=ctk.CTkFont(size=12))
         self.txt_hashtags.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
 
+    def _on_zoom_change(self, val):
+        self.lbl_zoom.configure(text=f"{int(val)}%")
+        self.update_summary()
+
+    def parse_timestamp(self, ts_str):
+        """Convierte texto de tiempo (ej. '01:30', '90', '1:25.5') a segundos float"""
+        if not ts_str:
+            return 0.0
+        s = ts_str.strip().replace(",", ".")
+        try:
+            if ":" in s:
+                parts = s.split(":")
+                if len(parts) == 2:
+                    return max(0.0, float(parts[0]) * 60 + float(parts[1]))
+                elif len(parts) == 3:
+                    return max(0.0, float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2]))
+            return max(0.0, float(s))
+        except Exception:
+            return 0.0
+
     def _on_preset_change(self, choice):
         preset = PLATFORM_PRESETS.get(choice)
         if not preset:
@@ -612,6 +694,10 @@ class SupremeVideoEditor(ctk.CTk):
         self.lbl_preset_desc.configure(text=preset["desc"])
         self.slider_fade_out.set(preset["fade_out"])
         self.lbl_fade_out.configure(text=f"{preset['fade_out']:.1f}s")
+        if preset["duration_mode"] == "fixed_short":
+            self.custom_duration_var.set(str(preset["custom_dur"]))
+        elif self.audio_dur > 0:
+            self.custom_duration_var.set(f"{self.audio_dur:.1f}")
         self._auto_output_name()
         self.update_summary()
 
@@ -657,6 +743,9 @@ class SupremeVideoEditor(ctk.CTk):
         if info and info["duration"] > 0:
             self.audio_dur = info["duration"]
             self.lbl_audio_info.configure(text=f"Duración: {self.audio_dur:.2f}s ({self.format_time(self.audio_dur)}) | Audio estéreo OK", text_color="#4ade80")
+            preset = PLATFORM_PRESETS.get(self.combo_preset.get(), PLATFORM_PRESETS[list(PLATFORM_PRESETS.keys())[0]])
+            if preset.get("duration_mode") != "fixed_short":
+                self.custom_duration_var.set(f"{self.audio_dur:.1f}")
         else:
             self.audio_dur = 0.0
             self.lbl_audio_info.configure(text="No se pudo determinar duración", text_color="#f87171")
@@ -685,9 +774,11 @@ class SupremeVideoEditor(ctk.CTk):
 
     def _auto_output_name(self):
         v_path = self.video_path.get()
-        if not v_path:
+        a_path = self.audio_path.get()
+        source_path = v_path if (v_path and os.path.exists(v_path)) else a_path
+        if not source_path:
             return
-        base_dir = os.path.dirname(v_path) or os.getcwd()
+        base_dir = os.path.dirname(source_path) or os.getcwd()
         
         preset_choice = self.combo_preset.get()
         preset = PLATFORM_PRESETS.get(preset_choice, PLATFORM_PRESETS[list(PLATFORM_PRESETS.keys())[0]])
@@ -705,30 +796,51 @@ class SupremeVideoEditor(ctk.CTk):
         return f"{m:02d}:{s:02d}.{ms}"
 
     def update_summary(self, *args):
-        if self.video_dur <= 0:
-            self.summary_box.configure(text="ℹ️ Selecciona un vídeo base para comenzar.")
+        preset = PLATFORM_PRESETS.get(self.combo_preset.get(), PLATFORM_PRESETS[list(PLATFORM_PRESETS.keys())[0]])
+        has_video = self.video_dur > 0 and os.path.exists(self.video_path.get())
+        has_audio = self.audio_dur > 0 and os.path.exists(self.audio_path.get())
+
+        if not has_video and not has_audio:
+            self.summary_box.configure(text="ℹ️ Selecciona un vídeo base o pista de audio para comenzar.")
             return
 
-        preset = PLATFORM_PRESETS.get(self.combo_preset.get(), PLATFORM_PRESETS[list(PLATFORM_PRESETS.keys())[0]])
         trans_dur = self.slider_trans_dur.get()
-        effective_clip_dur = max(0.5, self.video_dur - trans_dur)
+        effective_clip_dur = max(0.5, self.video_dur - trans_dur) if has_video else 30.0
 
-        if preset["duration_mode"] == "fixed_short":
-            target_dur = preset["custom_dur"]
+        # Target duration resolution (custom input or preset/audio)
+        try:
+            user_dur_val = float(self.custom_duration_var.get())
+            if user_dur_val > 0:
+                target_dur = user_dur_val
+            else:
+                target_dur = self.audio_dur if self.audio_dur > 0 else 30.0
+        except ValueError:
+            target_dur = self.audio_dur if self.audio_dur > 0 else 30.0
+
+        if has_video:
+            needed_loops = math.ceil((target_dur - trans_dur) / effective_clip_dur) + 1
+            if needed_loops < 2:
+                needed_loops = 2
+            video_summary = f"Vídeo fuente: {self.video_dur:.2f}s | {needed_loops} bucles continuos (xfade {trans_dur:.1f}s)"
         else:
-            target_dur = self.audio_dur if self.audio_dur > 0 else 60.0
+            video_summary = "Fondo visual animado de espectro (Generación automática)"
 
-        needed_loops = math.ceil((target_dur - trans_dur) / effective_clip_dur) + 1
-        if needed_loops < 2:
-            needed_loops = 2
+        # Zoom level info
+        zoom_val = int(self.slider_zoom.get())
+        zoom_info = f"100% (Normal)" if zoom_val == 100 else f"{zoom_val}% ({'Acercar' if zoom_val > 100 else 'Alejar'})"
 
-        audio_note = "Sin audio (Loop visual para Spotify Canvas)" if preset.get("no_audio") else f"Sincronizado con pista de audio ({target_dur:.2f}s)"
+        # Audio start point info
+        audio_start_sec = self.parse_timestamp(self.audio_start_var.get())
+        if preset.get("no_audio"):
+            audio_note = "Sin audio (Loop visual Spotify Canvas)"
+        else:
+            start_str = self.format_time(audio_start_sec)
+            audio_note = f"Desde {start_str} hasta {self.format_time(audio_start_sec + target_dur)} ({target_dur:.1f}s)"
 
         summary_text = (
             f"📊 ESTIMACIÓN ({preset['res']} • {preset['aspect']}):\n"
-            f"• Duración final: {target_dur:.2f}s | Vídeo fuente: {self.video_dur:.2f}s\n"
-            f"• {needed_loops} bucles continuos con transiciones cruzadas xfade ({trans_dur:.1f}s)\n"
-            f"• Audio: {audio_note} | Perfil YUV420p (Máxima compatibilidad con reproductores)"
+            f"• Duración final: {target_dur:.2f}s | {video_summary} | Zoom: {zoom_info}\n"
+            f"• Audio: {audio_note} | Perfil YUV420p (Compatibilidad universal 100%)"
         )
         self.summary_box.configure(text=summary_text)
 
@@ -810,15 +922,31 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         preset = PLATFORM_PRESETS.get(self.combo_preset.get(), PLATFORM_PRESETS[list(PLATFORM_PRESETS.keys())[0]])
         requires_audio = not preset.get("no_audio", False)
 
-        if not os.path.exists(v_in):
-            messagebox.showerror("Error", "El archivo de vídeo no existe o no es válido.")
+        has_v = bool(v_in and os.path.exists(v_in))
+        has_a = bool(a_in and os.path.exists(a_in))
+
+        if not has_v and not has_a:
+            messagebox.showerror("Faltan Archivos", "Debes seleccionar al menos un vídeo base o una pista de audio.")
             return
-        if requires_audio and not os.path.exists(a_in):
-            messagebox.showerror("Error", "Para este formato necesitas seleccionar una pista de audio.")
+
+        if not has_v:
+            confirm = messagebox.askyesno(
+                "Vídeo Base No Seleccionado",
+                "No has seleccionado un archivo en 'Vídeo Base'.\n\n¿Deseas exportar generando un fondo visual oscuro animado con espectro sonoro para la pista de audio?"
+            )
+            if not confirm:
+                return
+
+        if requires_audio and not has_a:
+            messagebox.showerror("Audio Requerido", "Para este formato necesitas seleccionar una pista de audio.")
             return
+
         if not out_f:
-            messagebox.showerror("Error", "Por favor especifica la ruta de guardado.")
-            return
+            self._auto_output_name()
+            out_f = self.output_path.get()
+            if not out_f:
+                messagebox.showerror("Ruta de Guardado", "Por favor especifica la ruta de guardado para el vídeo.")
+                return
 
         self.is_exporting = True
         self.btn_render.configure(state="disabled", text="⏳ RENDERIZANDO...")
@@ -842,8 +970,11 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         a_in = self.audio_path.get()
         out_f = self.output_path.get()
 
-        v_info = probe_file(v_in)
-        a_info = probe_file(a_in) if os.path.exists(a_in) else None
+        has_v = bool(v_in and os.path.exists(v_in))
+        has_a = bool(a_in and os.path.exists(a_in))
+
+        v_info = probe_file(v_in) if has_v else None
+        a_info = probe_file(a_in) if has_a else None
 
         v_dur = v_info["duration"] if v_info else self.video_dur
         a_dur = a_info["duration"] if a_info else self.audio_dur
@@ -858,108 +989,162 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
         w_str, h_str = preset["res"].split("x")
         width, height = int(w_str), int(h_str)
 
-        if preset["duration_mode"] == "fixed_short":
-            target_dur = preset["custom_dur"]
-        else:
-            target_dur = a_dur if a_dur > 0 else 60.0
-
-        effective_clip_dur = max(0.5, v_dur - trans_dur)
-        needed_loops = math.ceil((target_dur - trans_dur) / effective_clip_dur) + 1
-        if needed_loops < 2:
-            needed_loops = 2
-
-        # Base scaling and cropping to exact target resolution
-        base_scale = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},fps=30"
-
-        clip_labels = []
-        filter_lines = []
-        mode = self.combo_mode.get()
-        chosen_transition = self.combo_trans.get()
-
-        for i in range(needed_loops):
-            lbl = f"c{i}"
-            clip_labels.append(lbl)
-
-            filters = [f"trim=0:{v_dur:.3f}"]
-
-            if "Solo Bucles Limpios" in mode:
-                filters.append("setpts=PTS-STARTPTS")
-                filters.append(base_scale)
-                filters.append("eq=contrast=1.04:saturation=1.08")
-            elif "Ping-Pong" in mode:
-                if i % 2 == 1:
-                    filters.append("reverse")
-                filters.append("setpts=PTS-STARTPTS")
-                filters.append(base_scale)
-                filters.append("eq=contrast=1.05:saturation=1.1")
-            elif "Espejo Alternado" in mode:
-                if i % 2 == 1:
-                    filters.append("hflip")
-                filters.append("setpts=PTS-STARTPTS")
-                filters.append(base_scale)
-                filters.append("eq=contrast=1.05:saturation=1.1")
+        # Target duration: use custom duration if specified and > 0
+        try:
+            user_dur_val = float(self.custom_duration_var.get())
+            if user_dur_val > 0:
+                target_dur = user_dur_val
+            elif preset["duration_mode"] == "fixed_short":
+                target_dur = preset["custom_dur"]
             else:
-                variant = i % 6
-                if variant == 0:
+                target_dur = a_dur if a_dur > 0 else 60.0
+        except ValueError:
+            target_dur = preset["custom_dur"] if preset["duration_mode"] == "fixed_short" else (a_dur if a_dur > 0 else 60.0)
+
+        # Video Zoom Scaling & Cropping (Zoom Factor: 50% - 250%)
+        zoom_pct = self.slider_zoom.get()
+        zoom_factor = max(0.5, min(3.0, zoom_pct / 100.0))
+
+        audio_start_sec = self.parse_timestamp(self.audio_start_var.get())
+        filter_lines = []
+        cmd = ["ffmpeg", "-y"]
+
+        if has_v and v_dur > 0.5:
+            effective_clip_dur = max(0.5, v_dur - trans_dur)
+            needed_loops = math.ceil((target_dur - trans_dur) / effective_clip_dur) + 1
+            if needed_loops < 2:
+                needed_loops = 2
+
+            if abs(zoom_factor - 1.0) < 0.02:
+                base_scale = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},fps=30"
+            elif zoom_factor > 1.0:
+                z_w = int(width * zoom_factor)
+                z_h = int(height * zoom_factor)
+                if z_w % 2 != 0: z_w += 1
+                if z_h % 2 != 0: z_h += 1
+                base_scale = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},scale={z_w}:{z_h},crop={width}:{height},fps=30"
+            else:
+                z_w = int(width * zoom_factor)
+                z_h = int(height * zoom_factor)
+                if z_w % 2 != 0: z_w += 1
+                if z_h % 2 != 0: z_h += 1
+                base_scale = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},scale={z_w}:{z_h},pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:black,fps=30"
+
+            clip_labels = []
+            mode = self.combo_mode.get()
+            chosen_transition = self.combo_trans.get()
+
+            for i in range(needed_loops):
+                lbl = f"c{i}"
+                clip_labels.append(lbl)
+
+                filters = [f"trim=0:{v_dur:.3f}"]
+
+                if "Solo Bucles Limpios" in mode:
+                    filters.append("setpts=PTS-STARTPTS")
+                    filters.append(base_scale)
+                    filters.append("eq=contrast=1.04:saturation=1.08")
+                elif "Ping-Pong" in mode:
+                    if i % 2 == 1:
+                        filters.append("reverse")
                     filters.append("setpts=PTS-STARTPTS")
                     filters.append(base_scale)
                     filters.append("eq=contrast=1.05:saturation=1.1")
-                elif variant == 1:
-                    filters.append("hflip")
+                elif "Espejo Alternado" in mode:
+                    if i % 2 == 1:
+                        filters.append("hflip")
                     filters.append("setpts=PTS-STARTPTS")
                     filters.append(base_scale)
-                    filters.append("eq=contrast=1.08:saturation=1.15")
-                elif variant == 2:
-                    filters.append("reverse")
-                    filters.append("setpts=PTS-STARTPTS")
-                    filters.append(base_scale)
-                    filters.append("eq=contrast=1.05:saturation=1.12")
-                elif variant == 3:
-                    filters.append("setpts=PTS-STARTPTS")
-                    filters.append(base_scale)
-                    filters.append("vignette=PI/5")
-                    filters.append("eq=contrast=1.1:saturation=1.2")
-                elif variant == 4:
-                    filters.append("hflip")
-                    filters.append("reverse")
-                    filters.append("setpts=PTS-STARTPTS")
-                    filters.append(base_scale)
-                    filters.append("eq=contrast=1.06:saturation=1.1")
+                    filters.append("eq=contrast=1.05:saturation=1.1")
                 else:
-                    filters.append("setpts=PTS-STARTPTS")
-                    filters.append(base_scale)
-                    filters.append("vignette=PI/6")
-                    filters.append("eq=contrast=1.07:saturation=1.15")
+                    variant = i % 6
+                    if variant == 0:
+                        filters.append("setpts=PTS-STARTPTS")
+                        filters.append(base_scale)
+                        filters.append("eq=contrast=1.05:saturation=1.1")
+                    elif variant == 1:
+                        filters.append("hflip")
+                        filters.append("setpts=PTS-STARTPTS")
+                        filters.append(base_scale)
+                        filters.append("eq=contrast=1.08:saturation=1.15")
+                    elif variant == 2:
+                        filters.append("reverse")
+                        filters.append("setpts=PTS-STARTPTS")
+                        filters.append(base_scale)
+                        filters.append("eq=contrast=1.05:saturation=1.12")
+                    elif variant == 3:
+                        filters.append("setpts=PTS-STARTPTS")
+                        filters.append(base_scale)
+                        filters.append("vignette=PI/5")
+                        filters.append("eq=contrast=1.1:saturation=1.2")
+                    elif variant == 4:
+                        filters.append("hflip")
+                        filters.append("reverse")
+                        filters.append("setpts=PTS-STARTPTS")
+                        filters.append(base_scale)
+                        filters.append("eq=contrast=1.06:saturation=1.1")
+                    else:
+                        filters.append("setpts=PTS-STARTPTS")
+                        filters.append(base_scale)
+                        filters.append("vignette=PI/6")
+                        filters.append("eq=contrast=1.07:saturation=1.15")
 
-            filters.append("format=yuv420p")
-            clean_chain = ",".join(filters)
-            filter_lines.append(f"[0:v]{clean_chain}[{lbl}];")
+                filters.append("format=yuv420p")
+                clean_chain = ",".join(filters)
+                filter_lines.append(f"[0:v]{clean_chain}[{lbl}];")
 
-        current_input = clip_labels[0]
-        cur_offset = v_dur - trans_dur
+            current_input = clip_labels[0]
+            cur_offset = v_dur - trans_dur
 
-        for i in range(1, needed_loops):
-            next_input = clip_labels[i]
-            out_lbl = f"v{i}" if i < needed_loops - 1 else "vpreout"
+            for i in range(1, needed_loops):
+                next_input = clip_labels[i]
+                out_lbl = f"v{i}" if i < needed_loops - 1 else "vpreout"
 
-            if chosen_transition == "Aleatorias Dinámicas":
-                t_type = TRANSITIONS[(i - 1) % len(TRANSITIONS)]
+                if chosen_transition == "Aleatorias Dinámicas":
+                    t_type = TRANSITIONS[(i - 1) % len(TRANSITIONS)]
+                else:
+                    t_type = chosen_transition
+
+                filter_lines.append(
+                    f"[{current_input}][{next_input}]xfade=transition={t_type}:duration={trans_dur:.2f}:offset={cur_offset:.2f}[{out_lbl}];"
+                )
+                current_input = out_lbl
+                cur_offset += (v_dur - trans_dur)
+
+            # Video fade out
+            if fade_out > 0.1:
+                fade_start = max(0.0, target_dur - fade_out)
+                filter_lines.append(f"[{current_input}]fade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[v_faded];")
+                last_v = "v_faded"
             else:
-                t_type = chosen_transition
+                last_v = current_input
 
-            filter_lines.append(
-                f"[{current_input}][{next_input}]xfade=transition={t_type}:duration={trans_dur:.2f}:offset={cur_offset:.2f}[{out_lbl}];"
-            )
-            current_input = out_lbl
-            cur_offset += (v_dur - trans_dur)
-
-        # Video fade out
-        if fade_out > 0.1:
-            fade_start = max(0.0, target_dur - fade_out)
-            filter_lines.append(f"[{current_input}]fade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[v_faded];")
-            last_v = "v_faded"
+            cmd.extend(["-i", v_in])
+            audio_input_idx = 1
         else:
-            last_v = current_input
+            # Fallback: Create dynamic dark visualizer background
+            filter_lines.append(
+                f"color=c=#0f111a:s={width}x{height}:d={target_dur:.2f}:r=30,format=yuv420p[v_bg];"
+            )
+            if has_a and not is_no_audio:
+                wave_h = max(180, int(height / 5))
+                filter_lines.append(
+                    f"[0:a]showwaves=s={width}x{wave_h}:mode=cline:colors=#e11d48|#38bdf8:rate=30[waves];"
+                )
+                y_wave = f"(h-{wave_h})/2+100"
+                filter_lines.append(
+                    f"[v_bg][waves]overlay=x=0:y={y_wave}:format=auto[v_motion];"
+                )
+                last_v = "v_motion"
+            else:
+                last_v = "v_bg"
+
+            if fade_out > 0.1:
+                fade_start = max(0.0, target_dur - fade_out)
+                filter_lines.append(f"[{last_v}]fade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[v_faded];")
+                last_v = "v_faded"
+
+            audio_input_idx = 0
 
         # Text Overlay Processing
         enable_text = self.chk_enable_overlay.get()
@@ -968,11 +1153,9 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
 
         if enable_text and (title_text or artist_text):
             font_path = get_system_font_path()
-            # Escaping for drawtext
             safe_title = title_text.replace(":", "\\:").replace("'", "\\'").upper()
             safe_artist = artist_text.replace(":", "\\:").replace("'", "\\'")
 
-            # Scaling font size according to resolution
             title_fsize = max(28, int(width / 32))
             artist_fsize = max(18, int(width / 48))
 
@@ -998,7 +1181,6 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
                 x_title = "(w-text_w)/2"
                 x_artist = "(w-text_w)/2"
 
-            # Timing condition
             timing_choice = self.combo_text_timing.get()
             timing_filter = ""
             if "15 segundos" in timing_choice:
@@ -1006,34 +1188,28 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
             elif "8 segundos" in timing_choice:
                 timing_filter = ":enable='between(t,0,8)'"
 
-            # Draw title
             filter_lines.append(
                 f"[{last_v}]drawtext=fontfile='{font_path}':text='{safe_title}':fontsize={title_fsize}:fontcolor=white:x={x_title}:y={y_title}:shadowcolor=black@0.8:shadowx=3:shadowy=3{timing_filter}[v_txt1];"
             )
-            # Draw artist
             filter_lines.append(
                 f"[v_txt1]drawtext=fontfile='{font_path}':text='{safe_artist}':fontsize={artist_fsize}:fontcolor=white@0.85:x={x_artist}:y={y_artist}:shadowcolor=black@0.8:shadowx=2:shadowy=2{timing_filter}[vout];"
             )
         else:
             filter_lines.append(f"[{last_v}]null[vout];")
 
-        # Audio handling
-        if not is_no_audio and os.path.exists(a_in):
+        # Audio handling (with customizable start time / offset)
+        if not is_no_audio and has_a:
+            if audio_start_sec > 0.05:
+                cmd.extend(["-ss", f"{audio_start_sec:.3f}"])
+            cmd.extend(["-i", a_in])
+
             if fade_out > 0.1:
                 fade_start = max(0.0, target_dur - fade_out)
-                filter_lines.append(f"[1:a]afade=t=in:st=0:d=0.4,afade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[aout]")
+                filter_lines.append(f"[{audio_input_idx}:a]afade=t=in:st=0:d=0.4,afade=t=out:st={fade_start:.2f}:d={fade_out:.2f}[aout]")
             else:
-                filter_lines.append(f"[1:a]anull[aout]")
+                filter_lines.append(f"[{audio_input_idx}:a]anull[aout]")
 
         filter_complex = "".join(filter_lines)
-
-        cmd = [
-            "ffmpeg", "-y",
-            "-i", v_in
-        ]
-
-        if not is_no_audio and os.path.exists(a_in):
-            cmd.extend(["-i", a_in])
 
         cmd.extend([
             "-filter_complex", filter_complex,
@@ -1084,8 +1260,12 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
 
             import re
             time_regex = re.compile(r"time=(\d+):(\d+):(\d+\.\d+)")
+            captured_log = []
 
             for line in self.process.stdout:
+                captured_log.append(line)
+                if len(captured_log) > 30:
+                    captured_log.pop(0)
                 match = time_regex.search(line)
                 if match:
                     hours, mins, secs = match.groups()
@@ -1099,7 +1279,9 @@ Disfruta del videoclip / visualizer oficial de "{title.upper()}". {genre} con ba
             if ret == 0:
                 self.after(0, self._on_render_success, out_f)
             else:
-                self.after(0, self._on_render_failed, "FFmpeg terminó con código de error.")
+                tail_err = "".join(captured_log[-10:]).strip()
+                err_detail = f"FFmpeg terminó con código de error.\n\nDetalles:\n{tail_err}" if tail_err else "FFmpeg terminó con código de error."
+                self.after(0, self._on_render_failed, err_detail)
 
         except Exception as e:
             self.after(0, self._on_render_failed, str(e))
